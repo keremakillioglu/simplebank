@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres12
+        image: postgres:12
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
@@ -32,6 +32,12 @@ jobs:
 
     - name: Check out code into the GO module directory
       uses: actions/checkout@v2
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz
+        sudo mv migrate.linux-amd64 /usr/bin
+        which migrate
 
     - name: Run migrations
       run: make migrateup
