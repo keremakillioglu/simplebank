@@ -6,12 +6,9 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/lib/pq"
-)
+	"github.com/keremakillioglu/simplebank/util"
 
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+	_ "github.com/lib/pq"
 )
 
 // global var because it will be extensively used for testing
@@ -20,8 +17,12 @@ var testDB *sql.DB
 
 // test main function is the main entry point of all unit tests inside the package (e.g package db)
 func TestMain(m *testing.M) {
-	var err error
-	testDB, err = sql.Open(dbDriver, dbSource)
+	// go to parent folder
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("Cannot load config:", err)
+	}
+	testDB, err = sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("Cannot connect to db:", err)
 	}
