@@ -6,11 +6,17 @@ import (
 	"fmt"
 )
 
-// Store provides all functions to execute and run db queries in transactions
+// Store provides all functions to execute db queries and transaction
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
+// SQLStore provides all functions to execute and run SQL queries in transactions
 // note that indivdiual queries are handled with Queries struct in db.go
 // however, each query makes an operation on a specific table; so queries struct doesnt support transactions
 // here, we are extending its functionality by embedding it to Store struct
-type Store struct {
+type SQLStore struct {
 	// composition is used, rather than inheritance; as its suggested in GO
 	// all individual queries and functions will be available to Store
 	// and we will be able to implement transactions by adding more functions
@@ -20,9 +26,9 @@ type Store struct {
 }
 
 //NewStore creates a new store
-func NewStore(db *sql.DB) *Store {
+func NewStore(db *sql.DB) Store {
 
-	return &Store{
+	return &SQLStore{
 		db:      db,
 		Queries: New(db), //defined in db.go by sqlc
 	}
@@ -31,7 +37,7 @@ func NewStore(db *sql.DB) *Store {
 // take a context and callback function as an input, start a new db transaction
 // create a new Queries object with that transaction, and call the callback function on the queries
 // finally commit or rollback the transaction
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -72,7 +78,7 @@ type TransferTxResult struct {
 
 //TransferTx performs a money transfer from one account to another
 // It creates a transfer record, add account entries and update account balances within sinle tx
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 
 	var result TransferTxResult
 
