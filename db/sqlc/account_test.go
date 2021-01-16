@@ -14,8 +14,10 @@ import (
 // this will not be run as a unit test since it doesnt start with the word Test
 func createRandomAccount(t *testing.T) Account {
 
+	user := createRandomUser(t)
+
 	arg := CreateAccountParams{
-		Owner:    util.RandomOwner(),
+		Owner:    user.Username,
 		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}
