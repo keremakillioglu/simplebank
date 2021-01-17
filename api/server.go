@@ -20,8 +20,11 @@ func NewServer(store db.Store) *Server {
 	router := gin.Default()
 
 	// register the custom validator with gin
+	// binding.Validator.Engine() returns a general interface -> convert to validator pointer
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		// p1: name of validation tag, p2 : validCyrrency func in validator.go
 		v.RegisterValidation("currency", validCurrency)
+		// binding:"... currency at account.go createAccountRequest param & transfer.go"
 	}
 
 	// route, handlerfunc
@@ -36,6 +39,9 @@ func NewServer(store db.Store) *Server {
 
 	// transfer details specified in req body
 	router.POST("/transfers", server.createTransfer)
+
+	//if we pass multiple parameters: route,middlewares, handlefunc
+	router.POST("/newuser", server.createUser)
 
 	// add routes to router
 	server.router = router

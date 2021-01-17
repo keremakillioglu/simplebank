@@ -13,9 +13,12 @@ import (
 // this will not be run as a unit test since it doesnt start with the word Test
 func createRandomUser(t *testing.T) User {
 
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
+	require.NoError(t, err)
+
 	arg := CreateUserParams{
 		Username:       util.RandomOwner(),
-		HashedPassword: "secret",
+		HashedPassword: hashedPassword,
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),
 	}
